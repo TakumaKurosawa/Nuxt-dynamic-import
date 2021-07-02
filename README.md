@@ -1,69 +1,37 @@
-# sample
+# Nuxt 動的コンポーネントと動的インポートの検証
 
-## Build Setup
+## 参考文献一覧
 
-```bash
-# install dependencies
-$ yarn install
+- [VUE.JS(NUXT)でCOMPONENTを動的に追加する](https://uniblo.tech/?p=231)
 
-# serve with hot reload at localhost:3000
-$ yarn dev
+- [【Nuxt.js】コンポーネントの自動インポート](https://zenn.dev/kokota/articles/14beffb9e846f0)
 
-# build for production and launch server
-$ yarn build
-$ yarn start
+- [Nuxt.jsのbundleサイズを55%削減したwebpack周りの小技
+  ](https://qiita.com/hareku/items/d9f92c96697163356bd3#3-vuejs%E3%81%AE-dynamic-import20kb5kb)
 
-# generate static project
-$ yarn generate
-```
+- [Vue.js - 非同期コンポーネント](https://jp.vuejs.org/v2/guide/components-dynamic-async.html#%E9%9D%9E%E5%90%8C%E6%9C%9F%E3%82%B3%E3%83%B3%E3%83%9D%E3%83%BC%E3%83%8D%E3%83%B3%E3%83%88)
 
-For detailed explanation on how things work, check out the [documentation](https://nuxtjs.org).
+## 検証方法
 
-## Special Directories
+- Nuxt（v2.15.7）環境準備
+- components/ 配下に A ~ G のコンポーネントを用意
+- pages/index.vue にてダイナミックインポートを実装
+- vueの動的コンポーネントを用いて `:is="componentName"` とすることで、表示するコンポーネントを動的に変更できるようにした
+- ビルド後のファイル一覧を見てBundleのされ方を確認
+- ブラウザのNetworkを確認し、動的にJSファイルが読み込まれていることを確認
 
-You can create the following extra directories, some of which have special behaviors. Only `pages` is required; you can delete them if you don't want to use their functionality.
+## 検証結果
 
-### `assets`
+ビルド後の `.nuxt/dist/client` を見ると下記の画像の通り、A ~ Gの各コンポーネントがminifyされていることがわかる。
 
-The assets directory contains your uncompiled assets such as Stylus or Sass files, images, or fonts.
+<img width="295" alt="スクリーンショット 2021-07-02 12 37 05" src="https://user-images.githubusercontent.com/39955827/124216949-45278e00-db32-11eb-995d-2fc337b103e7.png">
 
-More information about the usage of this directory in [the documentation](https://nuxtjs.org/docs/2.x/directory-structure/assets).
+これらのファイルがWebページ上のNetworkコンソールで確認したときに、どのタイミングでダウンロードされるかを検証した。
 
-### `components`
+その結果、下記のGIFの通り、必要になったタイミングでのみダウンロードが走り、コンポーネント生成が行われることがわかった。
 
-The components directory contains your Vue.js components. Components make up the different parts of your page and can be reused and imported into your pages, layouts and even other components.
+![demo](https://user-images.githubusercontent.com/39955827/124217507-70f74380-db33-11eb-804c-d7775446db41.gif)
 
-More information about the usage of this directory in [the documentation](https://nuxtjs.org/docs/2.x/directory-structure/components).
+念の為、Analyze結果も載せておく。
 
-### `layouts`
-
-Layouts are a great help when you want to change the look and feel of your Nuxt app, whether you want to include a sidebar or have distinct layouts for mobile and desktop.
-
-More information about the usage of this directory in [the documentation](https://nuxtjs.org/docs/2.x/directory-structure/layouts).
-
-
-### `pages`
-
-This directory contains your application views and routes. Nuxt will read all the `*.vue` files inside this directory and setup Vue Router automatically.
-
-More information about the usage of this directory in [the documentation](https://nuxtjs.org/docs/2.x/get-started/routing).
-
-### `plugins`
-
-The plugins directory contains JavaScript plugins that you want to run before instantiating the root Vue.js Application. This is the place to add Vue plugins and to inject functions or constants. Every time you need to use `Vue.use()`, you should create a file in `plugins/` and add its path to plugins in `nuxt.config.js`.
-
-More information about the usage of this directory in [the documentation](https://nuxtjs.org/docs/2.x/directory-structure/plugins).
-
-### `static`
-
-This directory contains your static files. Each file inside this directory is mapped to `/`.
-
-Example: `/static/robots.txt` is mapped as `/robots.txt`.
-
-More information about the usage of this directory in [the documentation](https://nuxtjs.org/docs/2.x/directory-structure/static).
-
-### `store`
-
-This directory contains your Vuex store files. Creating a file in this directory automatically activates Vuex.
-
-More information about the usage of this directory in [the documentation](https://nuxtjs.org/docs/2.x/directory-structure/store).
+<img width="2538" alt="スクリーンショット 2021-07-02 12 48 01" src="https://user-images.githubusercontent.com/39955827/124217695-bfa4dd80-db33-11eb-814c-146f0f55f47d.png">
